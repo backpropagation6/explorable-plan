@@ -21,7 +21,8 @@ your HTML as it is, build the complete document.
 ## Procedure
 
 **1) Write the PLAN** as in `references/plan-format.md` and commit it. The page comes after the file, never
-in place of it.
+in place of it. That commit is version 1, and from then on the file only grows: a change is a new
+`## Version N` section at the end, never an edit of what is already committed (§ Versions of the format).
 
 **2) Decide whether a page is needed.** Yes if the plan asks the reader for at least one decision or estimates
 more than one session. The Artifact tool has no part in this decision. Otherwise summarise the plan in the
@@ -60,7 +61,9 @@ measurement or estimate); the page adds no numbers. Examples you invent are decl
 
 **4) Write the content** in a scratch file outside the repository, starting from
 [`examples/minimal.html`](examples/minimal.html): the `<!--plan` metadata block first (including `theme:` and
-`lang:` from step 2, and `commit:` from `git rev-parse --short HEAD` after the plan commit), then
+`lang:` from step 2, `commit:` from `git rev-parse --short HEAD` after the plan commit, and `versions:` with
+one line per version of the plan, oldest first, `<N> <YYYY-MM-DD> <commit> <what changed>`, the last one with
+the same commit as `commit:`; for a first page, `versions: 1 <date> <commit> First plan.`), then
 `<main id="content">`. Show the eight things a plan page needs: status and effort; the choices already made;
 the mechanism in a diagram; a manipulable example of the delicate point; the acceptance test, simulable and
 starting empty ("to be measured"); the steps with their safe states; costs and risks; the decisions, with an
@@ -73,9 +76,14 @@ the tool, build with `--fragment` (the tool adds the document skeleton) and publ
 build the default, a complete document, and hand the user the local file path in step 6.
 
 ```
-python3 <root>/kit/build.py [--fragment] <content.html> <page.html>
-python3 <root>/kit/check.py <page.html> <screenshot-folder>
+python3 <root>/kit/build.py [--fragment] <content.html> <name>.v<N>.html
+python3 <root>/kit/check.py <name>.v<N>.html <screenshot-folder>
 ```
+
+Name the page after its version. `build.py` never overwrites another version: it rebuilds the same version
+of the same plan in place (that is how you fix what `check.py` finds), and it stops, leaving the file as it
+is, on a file that holds another version, another plan, or no plan at all. Do not delete that file to get
+past the error: write to the name the error proposes.
 
 Repeat until `check.py` prints `OK`. Exit code 3 means the browser checks did not run (playwright or Chromium
 is missing): that is not a pass. The check is a smoke test, not a gate: it finds the faults listed at the top
@@ -86,34 +94,47 @@ screenshots, light and dark, at 1280 and 390 px, before trusting an OK.
 it: give the user the absolute path of the checked file and say to open it in a browser.
 
 **7) If you published, put the link in the PLAN header** and commit:
-`> **Explorable presentation:** [interactive page](<url>) (private; reflects commit <sha>). If the two differ, the plan file is canonical.`
+`> **Explorable presentation:** [interactive page](<url>) (private; version <N>, reflects commit <sha>). If the two differ, the plan file is canonical.`
 A file handed over has no link: there is nothing to put in the header.
 
 **8) Tell the user** the link (or the file path) and the decisions you need from them; if step 2 ruled the page
 out, say that.
 
-**9) When the user answers,** the decisions go into the PLAN (a dated `## Decisions` section, or `## Outcome` if
-the work is closed) and are committed in the same session: an answer that stays in the chat or on the page is
-not recorded. If they change the plan, the paragraph below applies.
+**9) When the user answers,** the decisions are appended to the PLAN (a dated `## Decisions` section at the
+end, or `## Outcome` if the work is closed) and committed in the same session: an answer that stays in the
+chat or on the page is not recorded. If the answer changes the plan, it opens a new version: the section below
+applies.
 
 ## When the plan changes after delivery
 
-Update the content and its `commit:`, rebuild with the same flag as before, then republish at the same URL and
-update the commit in the PLAN header, or hand over the new file. In a new session the content file no longer
-exists: read the page back (with the Artifact tool's read action, which saves the whole page to a file, or
-from the file you handed over) and run
+A change is a new version, never an overwrite: of the plan file, of the page file, or of the published page.
+
+1. Append `## Version <N+1> (YYYY-MM-DD)` to the PLAN (what changes, in which section, why) and commit it on
+   its own.
+2. Get the content file of version N (in a new session it no longer exists: see below). Update the page where
+   the new version changes it, add the line `<N+1> <YYYY-MM-DD> <commit> <what changed>` to `versions:`, set
+   `commit:` to that commit and `date:` to today. The page footer shows the line as you write it.
+3. Build with the same flag as before into a new file, `<name>.v<N+1>.html`, and check it as in step 5. The
+   file of version N stays where it is.
+4. Republish at the same URL and update the version and the commit in the PLAN header. The Artifact tool keeps
+   the earlier versions in the artifact's history, and the page lists every version in its footer. Without a
+   publishing tool, hand over the new file next to the old one.
+
+In a new session, read the page back (with the Artifact tool's read action, which saves the whole page to a
+file, or from the file you handed over) and run
 `python3 <root>/kit/build.py --extract <saved page> <content.html>`. `build.py` wraps the content between two
 sentinel comments and repeats the `<!--plan` block at the end of the page, so `--extract` rebuilds metadata
-(theme and lang included), `<main>` and scripts untouched, from a complete document, a fragment, or a
-fragment inside another skeleton. Do not ask the look again; start from step 5.
+(theme, lang and versions included), `<main>` and scripts untouched, from a complete document, a fragment, or
+a fragment inside another skeleton. Do not ask the look again: go on from point 2 above, or from step 5 if you
+are only rebuilding the same version.
 
 ## The kit
 
 | File | What it does |
 | --- | --- |
-| [`kit/base.html`](kit/base.html) | Components (bands, tabs, disclosures, steps, bars, number tables, decisions), light and dark mode (the reader's system, or `data-theme="light"`/`"dark"` on the root element), print rules, masthead and footer with the commit and "the file is canonical"; `lang` and `data-plan-theme` on the content wrapper, also without JavaScript. |
+| [`kit/base.html`](kit/base.html) | Components (bands, tabs, disclosures, steps, bars, number tables, decisions), light and dark mode (the reader's system, or `data-theme="light"`/`"dark"` on the root element), print rules, masthead with the version, footer with the commit, the list of versions and "the file is canonical"; `lang` and `data-plan-theme` on the content wrapper, also without JavaScript. |
 | [`kit/base.js`](kit/base.js) | The generic parts, exposed as `window.Plan`: keyboard tabs, steps with previous and next, disclosures, a composable answer with copy, print with everything open and then the state from before. UI strings come from a per-language dictionary. |
-| [`kit/build.py`](kit/build.py) | Assembles content and kit into a complete HTML document (`--fragment`: only the part inside a document), resolves the theme, moves page scripts after `base.js`, wraps the content in sentinels and repeats the metadata at the end; `--extract` does the reverse. Fails on a missing (`theme` included), unknown or repeated key, a non-hex commit, a title outside 2-4 words, an unknown theme, a custom theme without both rows or under 4.5:1, any `%%` left in the page, or the same path for input and output. |
+| [`kit/build.py`](kit/build.py) | Assembles content and kit into a complete HTML document (`--fragment`: only the part inside a document), resolves the theme, moves page scripts after `base.js`, wraps the content in sentinels and repeats the metadata at the end; `--extract` does the reverse. Fails on a missing (`theme` included), unknown or repeated key, a non-hex commit, a title outside 2-4 words, an unknown theme, a custom theme without both rows or under 4.5:1, any `%%` left in the page, the same path for input and output, a malformed `versions:` list, or an output that holds another version, another plan or no plan (it is never overwritten). |
 | [`kit/check.py`](kit/check.py) | Smoke test of the page as delivered: source checks (external resources, size, footer, the theme's `forbidden` rules) and Chromium checks (JS errors, horizontal scroll, background, the light/dark switch on the root element, text contrast, bars, tabs and steps with a click cap, print and back, no-JavaScript view). |
 | [`kit/themes/`](kit/themes) | The presets: `neutral`, `warm`, `cool`, `high-contrast`. |
 | [`examples/`](examples) | An invented PLAN with every component, in the neutral theme and with a custom one. |

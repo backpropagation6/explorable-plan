@@ -27,6 +27,8 @@ space continues the previous key. An unknown or repeated key is an error.
     sources: <p>...</p>            (optional, HTML)
       <p>...</p>                   (continuation)
     signature: Prepared on ...     (optional; empty by default)
+    versions: 1 2026-10-08 1a2b3c4 First plan.          (optional; one line per version of the
+      2 2026-10-10 5d6e7f8 Step 3 split in two.           PLAN, oldest first; the last commit is commit:)
     -->
 
 Then the HTML body, usually `<main id="content">...</main>`. `<script>` blocks in the content are
@@ -37,12 +39,17 @@ The output keeps the content between two sentinel comments and re-emits the `<!-
 the end of the page. From a published page that was saved to a file, `--extract` rebuilds the
 content file (metadata, body, scripts, theme and lang included) so the page can be rebuilt.
 
+No overwrite: an output that already exists is replaced only if it holds the same version of the
+same plan (rebuilding while you fix what check.py found). Another version, another plan, or a file
+without a <!--plan block is left as it is and the build stops. A page without versions: is version 1.
+
 Exit codes: 0 done; 1 on any error: a missing (theme included), unknown or repeated metadata key,
-a commit that is not hexadecimal (upper or lower case, written in lower case), an unknown theme, a
-custom theme without both a light and a dark row or with text/background contrast below 4.5:1 in
-either mode, any %% left in the page, the same path for input and output, or a file that cannot
-be found.
+a commit that is not hexadecimal (upper or lower case, written in lower case), a malformed versions
+list, an unknown theme, a custom theme without both a light and a dark row or with text/background
+contrast below 4.5:1 in either mode, any %% left in the page, the same path for input and output,
+an output that holds another version, another plan or no plan, or a file that cannot be found.
 """
+import datetime
 import html
 import json
 import pathlib
@@ -52,7 +59,7 @@ import sys
 KIT = pathlib.Path(__file__).resolve().parent
 THEMES = KIT / "themes"
 REQUIRED = ("title", "description", "masthead", "date", "plan", "commit", "theme")
-OPTIONAL = ("sources", "signature", "lang", "theme-colors", "theme-font")
+OPTIONAL = ("sources", "signature", "lang", "theme-colors", "theme-font", "versions")
 META = re.compile(r"<!--plan[ \t]*\n(.*?)-->", re.S)
 CONTENT = ("<!--plan:content-->", "<!--/plan:content-->")
 PAGE_JS = ("<!--plan:page-js-->", "<!--/plan:page-js-->")
@@ -85,6 +92,10 @@ UI = {
                    "September", "October", "November", "December"],
         "footer": "This page presents the PLAN; it does not replace it. The source is the versioned "
                   "file {plan}; the page reflects commit {commit}. If the two differ, the file is canonical.",
+        "version": "version {n}",
+        "versions": "Versions of this plan, oldest first. Each one is the PLAN file at its commit: the file "
+                    "only grows, so an earlier version is never rewritten.",
+        "current": "this page",
     },
     "it": {
         "skip": "Vai al contenuto",
@@ -99,6 +110,10 @@ UI = {
                    "settembre", "ottobre", "novembre", "dicembre"],
         "footer": "Questa pagina presenta il PLAN, non lo sostituisce. La fonte è il file versionato "
                   "{plan}; la pagina riflette il commit {commit}. Se i due divergono, vale il file.",
+        "version": "versione {n}",
+        "versions": "Versioni di questo piano, dalla prima. Ognuna è il file PLAN al suo commit: il file "
+                    "cresce soltanto, quindi una versione precedente non si riscrive.",
+        "current": "questa pagina",
     },
 }
 JS_UI_KEYS = ("to_decide", "copied", "selected", "decimal", "date_fmt", "months")
@@ -214,7 +229,44 @@ def read_meta(block):
         fail(f"lang must be one of {', '.join(sorted(UI))}, not {meta['lang']!r}")
     if meta.get("theme-font", "sans") not in FONTS:
         fail(f"theme-font must be one of {', '.join(FONTS)}, not {meta['theme-font']!r}")
+    parse_versions(meta)
     return meta
+
+
+def parse_versions(meta):
+    """`versions:` as a list of (number, date, commit, what changed), oldest first; [] when absent.
+    Numbers run 1..N, dates are valid and never go back, commits are distinct, the last is commit:."""
+    out = []
+    for line in meta.get("versions", "").splitlines():
+        if not line.strip():
+            continue
+        m = re.fullmatch(r"(\d+)\s+(\d{4}-\d{2}-\d{2})\s+([0-9a-fA-F]{7,40})\s+(\S.*)", line.strip())
+        if not m:
+            fail(f"versions: bad line {line.strip()!r}; write `<number> <YYYY-MM-DD> <commit> <what changed>`")
+        n, day, sha, what = int(m.group(1)), m.group(2), m.group(3).lower(), m.group(4).strip()
+        try:
+            date = datetime.date.fromisoformat(day)
+        except ValueError:
+            fail(f"versions: {day} is not a valid date (version {n})")
+        if n != len(out) + 1:
+            fail(f"versions: expected version {len(out) + 1}, found {n}; number them 1, 2, 3... oldest first")
+        if out and date < out[-1][1]:
+            fail(f"versions: version {n} is dated {day}, before version {n - 1} ({out[-1][1]})")
+        if any(sha == v[2] for v in out):
+            fail(f"versions: commit {sha} appears twice; each version reflects its own commit")
+        out.append((n, date, sha, what))
+    if "versions" in meta and not out:
+        fail("versions: is empty; remove the key or write one line per version")
+    if out and out[-1][2] != meta["commit"].lower():
+        fail(f"versions: the last version ({out[-1][0]}) has commit {out[-1][2]}, but commit: is "
+             f"{meta['commit'].lower()}; the page reflects the last version")
+    return out
+
+
+def version_of(meta):
+    """The version a page or content file holds: the last of `versions:`, or 1 without the key."""
+    versions = parse_versions(meta)
+    return versions[-1][0] if versions else 1
 
 
 def parse_theme_colors(value):
@@ -348,6 +400,38 @@ def ensure_distinct(src, out):
         fail(f"input and output are the same file: {out}. Write the output to another path.")
 
 
+def versioned_name(out, n):
+    """The output path with `.v<n>` before the extension, replacing a `.v<k>` already there."""
+    stem = re.sub(r"\.v\d+$", "", out.stem)
+    return out.with_name(f"{stem}.v{n}{out.suffix}")
+
+
+def ensure_no_overwrite(out, meta):
+    """Never replace another version of the plan, another plan, or a file this kit did not write.
+    The same version of the same plan may be rebuilt: that is fixing it, not overwriting it."""
+    if not out.exists():
+        return
+    keep = " It is left as it is: choose another path, or remove the file yourself if you mean to replace it."
+    if not out.is_file():
+        fail(f"{out} exists and is not a file.{keep}")
+    try:
+        blocks = META.findall(out.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeDecodeError) as e:
+        fail(f"{out} exists and cannot be read ({e}).{keep}")
+    if not blocks:
+        fail(f"{out} exists and holds no <!--plan block, so this kit did not write it.{keep}")
+    try:
+        old = read_meta(blocks[-1])
+    except PlanError as e:
+        fail(f"{out} exists and its <!--plan block cannot be read ({e}).{keep}")
+    if old["plan"] != meta["plan"]:
+        fail(f"{out} holds another plan ({old['plan']}).{keep}")
+    have, want = version_of(old), version_of(meta)
+    if have != want:
+        fail(f"{out} holds version {have} of this plan and this is version {want}: a version is never "
+             f"overwritten. Write version {want} to {versioned_name(out, want)}.")
+
+
 def write_out(out, text):
     """Write the output, creating its folder if needed."""
     try:
@@ -392,7 +476,7 @@ def extract(page_path, out_path):
         if i < 0 or j < 0:
             fail(f"missing sentinel in the page: {a if i < 0 else b}")
         parts.append(text[i + len(a):j].strip("\n"))
-    read_meta(blocks[-1])
+    ensure_no_overwrite(out_path, read_meta(blocks[-1]))
     write_out(out_path, f"<!--plan\n{blocks[-1]}-->\n{parts[0]}\n{parts[1]}\n")
     print(f"extracted {out_path} from the <!--plan block at the end of {page_path.name}")
 
@@ -400,6 +484,7 @@ def extract(page_path, out_path):
 def build(src, out, fragment=False):
     ensure_distinct(src, out)
     block, meta, body, page_js = read_content(src)
+    ensure_no_overwrite(out, meta)
     words = len(meta["title"].split())
     if not 2 <= words <= 4:
         fail(f"the title is a name of 2-4 words, not {words}: {meta['title']!r}")
@@ -408,6 +493,17 @@ def build(src, out, fragment=False):
     theme = resolve_theme(meta)
     esc = lambda s: html.escape(s, quote=True)
     footer = ui["footer"].format(plan=f"<code>{esc(meta['plan'])}</code>", commit=f"<code>{esc(meta['commit'])}</code>")
+    footer = f"<p data-canonical>{footer}</p>"
+    date = esc(meta["date"])
+    versions = parse_versions(meta)
+    if versions:
+        date += " · " + esc(ui["version"].format(n=versions[-1][0]))
+        label = ui["version"][:1].upper() + ui["version"][1:]
+        items = "".join(
+            f"<li>{esc(label.format(n=n))} · {d.isoformat()} · <code>{sha}</code> · {esc(what)}"
+            + (f" ({esc(ui['current'])})" if n == versions[-1][0] else "") + "</li>"
+            for n, d, sha, what in versions)
+        footer += f'\n<p>{esc(ui["versions"])}</p>\n<ol class="versions">{items}</ol>'
     signature = meta.get("signature", "")
     if fragment:
         doc_head = doc_body = doc_end = ""
@@ -426,9 +522,9 @@ def build(src, out, fragment=False):
         "%%THEME_CSS%%": theme_css(theme, ui),
         "%%SKIP%%": esc(ui["skip"]),
         "%%MASTHEAD%%": esc(meta["masthead"]),
-        "%%DATE%%": esc(meta["date"]),
+        "%%DATE%%": date,
         "%%CONTENT%%": f"{CONTENT[0]}\n{body}\n{CONTENT[1]}",
-        "%%FOOTER%%": f"<p data-canonical>{footer}</p>",
+        "%%FOOTER%%": footer,
         "%%SOURCES%%": meta.get("sources", ""),
         "%%SIGNATURE%%": f"<p>{esc(signature)}</p>" if signature else "",
         "%%UI%%": ui_json(ui, lang),

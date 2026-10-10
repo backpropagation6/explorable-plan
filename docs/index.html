@@ -173,6 +173,8 @@ pre{font-family:var(--mono);font-size:13px;line-height:1.45;background:var(--was
 
 footer.page-end{border-top:1px solid var(--rule);padding:32px 0 48px;font-size:13px;color:var(--muted)}
 footer.page-end p{margin:0 0 8px}
+footer.page-end ol.versions{list-style:none;padding-left:0;margin:0 0 16px}
+footer.page-end ol.versions li{margin:0 0 4px}
 
 @media (max-width:649px){
   body{font-size:16px}
@@ -203,7 +205,7 @@ footer.page-end p{margin:0 0 8px}
 <body>
 <div lang="en" data-plan-theme="neutral">
 <a class="skip" href="#content">Skip to content</a>
-<div class="masthead"><div class="col"><span>PLAN · example, invented</span><span>10 October 2026</span></div></div>
+<div class="masthead"><div class="col"><span>PLAN · example, invented</span><span>10 October 2026 · version 2</span></div></div>
 
 <!--plan:content-->
 <main id="content">
@@ -214,7 +216,7 @@ footer.page-end p{margin:0 0 8px}
 <h1 id="h-top">Move the nightly export to a queue worker</h1>
 <p class="lead">The export runs as one long job and fails silently when it overruns. The plan replaces it with a worker that takes one account at a time and reports each result.</p>
 <dl class="facts">
-<div><dt>Status</dt><dd>PLAN committed, commit <code>0000000</code> (example).</dd></div>
+<div><dt>Status</dt><dd>PLAN version 2, commit <code>0000002</code> (example). The versions are listed at the end of the page.</dd></div>
 <div><dt>Effort</dt><dd><span class="note">estimate:</span> 2 sessions.</dd></div>
 <div><dt>Page</dt><dd>Worth building only because the plan has decisions. This page is the kit's example.</dd></div>
 <div><dt>Needed from you</dt><dd>Nothing: the <a href="#decisions">decisions form</a> below is an example.</dd></div>
@@ -461,7 +463,9 @@ footer.page-end p{margin:0 0 8px}
 
 <footer class="page-end" id="sources">
 <div class="col">
-<p data-canonical>This page presents the PLAN; it does not replace it. The source is the versioned file <code>PLAN-export-worker-2026-10-10.md</code>; the page reflects commit <code>0000000</code>. If the two differ, the file is canonical.</p>
+<p data-canonical>This page presents the PLAN; it does not replace it. The source is the versioned file <code>PLAN-export-worker-2026-10-10.md</code>; the page reflects commit <code>0000002</code>. If the two differ, the file is canonical.</p>
+<p>Versions of this plan, oldest first. Each one is the PLAN file at its commit: the file only grows, so an earlier version is never rewritten.</p>
+<ol class="versions"><li>Version 1 · 2026-10-08 · <code>0000001</code> · First plan.</li><li>Version 2 · 2026-10-10 · <code>0000002</code> · Step 4 waits for a full period of worker results before the old job is removed. (this page)</li></ol>
 <p>This plan, its figures and its quote are invented to show the kit. Every figure carries a label: <code>estimate:</code> for a guess, <code>example:</code> for an illustration.</p>
 
 </div>
@@ -621,9 +625,11 @@ description: An invented example PLAN that uses every component of the explorabl
 masthead: PLAN · example, invented
 date: 10 October 2026
 plan: PLAN-export-worker-2026-10-10.md
-commit: 0000000
+commit: 0000002
 theme: neutral
 lang: en
+versions: 1 2026-10-08 0000001 First plan.
+  2 2026-10-10 0000002 Step 4 waits for a full period of worker results before the old job is removed.
 sources: <p>This plan, its figures and its quote are invented to show the kit. Every figure carries a label: <code>estimate:</code> for a guess, <code>example:</code> for an illustration.</p>
 -->
 </body>

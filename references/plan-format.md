@@ -45,6 +45,26 @@ measured") and never shows an expected result as if it were a measurement.
 What can break, how you find out (who tells you, on which channel, how soon) and how to go back, with the
 command. A rollback that exists only in words counts as no rollback and is written as such.
 
+## Versions: the file only grows
+
+The first commit of the plan is version 1. From then on nothing already committed is rewritten or deleted:
+the four sections stay as they were approved, and everything new goes at the end of the file, in the order
+it happened.
+
+- **A change to the plan** (files, order, acceptance test, risks) is a new section at the end,
+  `## Version N (YYYY-MM-DD)`: what changes, in which section, and why. It overrides the earlier text only
+  where it says so. Commit it on its own, like version 1, before the work it changes.
+- **Decisions** go in a dated `## Decisions (YYYY-MM-DD)` section at the end. An answer that only picks an
+  option the plan offered is not a new version; an answer that changes the plan opens one.
+- **The header is the only exception.** The lines above the first section may be updated: the current
+  version and the link to the explorable page.
+- **The current plan** is version 1 read together with the version sections, in order. When that gets hard
+  to follow, do not rewrite: start a new PLAN file from the current state, link it to the old one, and leave
+  the old one as it is.
+
+The page lists the versions in its footer (number, date, commit, what changed). Each one can be read back
+with `git show <commit>:<plan file>`.
+
 ## Closing: the outcome section
 
 When the work is done, add an `## Outcome` section at the end of the same file: what was actually done,
@@ -53,16 +73,19 @@ is not deleted and not rewritten afterwards; its use is the comparison between t
 
 If the work stops halfway, `## Outcome` says where it stopped and what is missing.
 
-When the reader answers the decisions of a plan, put them in a dated `## Decisions` section of the file (or
-in `## Outcome` if the work is closed) and commit it in the same session. An answer that stays in the chat
-or on the page is not recorded.
+When the reader answers the decisions of a plan, append them in a dated `## Decisions` section at the end of
+the file (or in `## Outcome` if the work is closed) and commit it in the same session. An answer that stays
+in the chat or on the page is not recorded.
 
-## Two ways to cheat, and how to see them
+## Three ways to cheat, and how to see them
 
 1. **The plan written after the code.** Compare `git log --oneline --reverse -- PLAN-<topic>-*.md` with the
    implementation commits. If the plan came later, say so.
 2. **The inflated plan.** A plan twice as long as the change it describes is a bad sign, not a good one. The
    four sections fit comfortably on one page for most changes.
+3. **The rewritten plan.** After the first commit, `git log -p -- PLAN-<topic>-*.md` should show only added
+   lines, apart from the header. A removed or changed line below the header means an approved version was
+   rewritten instead of followed by a new one.
 
 ## What the explorable page shows
 

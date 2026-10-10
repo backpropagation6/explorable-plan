@@ -57,6 +57,9 @@ the two differ. When you answer, your decisions go back into the plan file, not 
 5) **It checks the page in Chromium** with `kit/check.py`, light and dark, at desktop and phone width.
 6) **It delivers it.** With a publishing tool (the Artifact tool in Claude Code) it publishes a private page;
    without one, you get the path of the file to open in a browser.
+7) **A change is a new version, not an overwrite.** The plan file only grows: a change is a `## Version N`
+   section at its end. The page is built into a new file (`name.v2.html`), republished at the same URL, and
+   lists every version in its footer with its date, commit and what changed.
 
 ![The example page in the four presets and a custom theme, light row and dark row](docs/themes.png)
 
@@ -120,13 +123,17 @@ Open `out/minimal.html` in a browser. `build.py` takes a content file (a metadat
 writes one page: by default a complete HTML document; with `--fragment` only the part that goes inside a
 document, for a host that adds the skeleton itself (such as the Artifact tool; a fragment opened directly in a
 browser runs in quirks mode and ignores the phone viewport). It creates the output folder if it is missing,
-and refuses to write over its input. `check.py` tests the file as delivered (a file that starts with
+and never overwrites: it replaces an existing file only when that file holds the same version of the same
+plan (a rebuild while you fix what `check.py` found), and stops, leaving the file as it is, on another
+version, another plan, or a file it did not write. The error proposes the name to use (`name.v2.html`). `check.py` tests the file as delivered (a file that starts with
 `<!doctype` is loaded as it is, anything else is wrapped in a skeleton first), prints `OK` and exits 0, or
 lists the problems and exits 1. Write outputs outside your repository, or under `out/`, which `.gitignore`
 covers.
 
 The pages in `docs/` are the two examples, built with the same command (`docs/index.html` from
-`examples/minimal.html`, `docs/custom.html` from `examples/minimal-custom.html`).
+`examples/minimal.html`, `docs/custom.html` from `examples/minimal-custom.html`). They are served at fixed
+URLs, so a new version of the examples replaces them on purpose: `build.py` refuses, you remove the two files
+yourself and build again, and git keeps the earlier version.
 
 ## The content file
 
@@ -140,6 +147,7 @@ plan: PLAN-topic-2026-10-10.md
 commit: 0000000
 theme: neutral
 lang: en
+versions: 1 2026-10-10 0000000 First plan.
 -->
 <main id="content"> ... </main>
 ```
@@ -161,6 +169,7 @@ an error.
 | `theme-font` | no | `sans`, `serif` or `mono`: a system font stack. Overrides the preset's font. |
 | `sources` | no | HTML for the footer. |
 | `signature` | no | A line at the end of the footer. Empty by default. |
+| `versions` | no | One line per version of the PLAN, oldest first: `<number> <YYYY-MM-DD> <commit> <what changed>`. Numbers run 1, 2, 3; dates never go back; commits are distinct and the last one is `commit:`. The masthead shows the version and the footer lists them all. Without it the page is version 1 and shows no version. |
 
 A custom theme:
 
@@ -194,6 +203,8 @@ python3 kit/build.py content.html page2.html
 
 The extracted content has the same metadata, so `theme:` and `lang:` come back with it, and `page2.html` is
 identical to `page.html` (build both with the same `--fragment` choice: the mode is not stored in the page).
+`--extract` follows the same no-overwrite rule as a build: it does not write over a content file that holds
+another version.
 
 ## Themes
 
