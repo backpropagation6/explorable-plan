@@ -1,12 +1,22 @@
 ---
 name: explorable-plan
-description: Write a PLAN file, then turn it into an explorable HTML page (tabs, steps, charts, a decisions form) after asking how the report should look. Build and check it in Chromium; publish with the Artifact tool or hand over the file. Use for plans that need decisions or span several sessions.
+description: Write a PLAN file, then turn it into an explorable HTML page (tabs, steps, charts, a decisions form) after asking how the report should look. Build and check it in Chromium; publish it or hand over the file. Use for plans that need decisions or span several sessions.
+license: MIT
+compatibility: Any Agent Skills client that can run shell commands. Needs Python 3.8+ and git; Playwright with Chromium for the browser checks. A publishing tool (the Artifact tool in Claude Code) is optional.
 ---
 
 # explorable-plan: write the plan, then the page when it earns one
 
 The root is the folder that contains this file, not the working directory: call the scripts by absolute
-path (`python3 <root>/kit/build.py ...`). The format of a PLAN is in [`references/plan-format.md`](references/plan-format.md).
+path (`python3 <root>/kit/build.py ...`). If your agent did not tell you where this file is, find it with
+`find -L . ~/.agents ~/.claude ~/.codex ~/.gemini ~/.copilot ~/.cursor ~/.config/opencode -path '*/explorable-plan/kit/build.py' 2>/dev/null | head -1`. The format of a PLAN is in [`references/plan-format.md`](references/plan-format.md).
+
+**Any agent can follow this procedure.** Two tools in it carry Claude Code's names: AskUserQuestion (step 2)
+and the Artifact tool (steps 5 to 7 and the rebuild). An agent without them uses its own equivalent, or the
+fallback written next to each mention: the questions in the chat, the complete HTML file handed over. Another
+publishing tool counts as the Artifact tool only if the page it publishes stays private until the user shares
+it. If it adds the document skeleton itself (doctype, charset, viewport), build with `--fragment`; if it serves
+your HTML as it is, build the complete document.
 
 ## Procedure
 

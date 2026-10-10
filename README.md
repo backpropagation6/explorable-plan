@@ -1,8 +1,12 @@
 # explorable-plan
 
-A Claude Code skill that turns an agent's PLAN into a page you can explore: decisions up front, the mechanism
+An agent skill that turns an agent's PLAN into a page you can explore: decisions up front, the mechanism
 as a diagram, steps you click through, costs and risks in one place, and a form that composes your answer.
 One self-contained HTML file, light and dark, readable on a phone.
+
+It is written in the open [Agent Skills](https://agentskills.io) format, so any agent that loads `SKILL.md`
+folders and can run shell commands can use it: Claude Code, Codex, Gemini CLI, GitHub Copilot, Cursor and
+OpenCode among others. See [Install](#install) for where each one looks.
 
 ![A plan page on a desktop in light mode and on a phone in dark mode](docs/preview.png)
 
@@ -51,15 +55,48 @@ the two differ. When you answer, your decisions go back into the plan file, not 
 4) **It writes the content and builds the page** with `kit/build.py`. The page adds no numbers the plan does
    not already have.
 5) **It checks the page in Chromium** with `kit/check.py`, light and dark, at desktop and phone width.
-6) **It delivers it.** With the Artifact tool it publishes a private page; without it, you get the path of the
-   file to open in a browser.
+6) **It delivers it.** With a publishing tool (the Artifact tool in Claude Code) it publishes a private page;
+   without one, you get the path of the file to open in a browser.
 
 ![The example page in the four presets and a custom theme, light row and dark row](docs/themes.png)
 
 ## Install
 
-Copy this folder to `.claude/skills/explorable-plan/` in a project, or to `~/.claude/skills/explorable-plan/`
-for all your projects. Then ask for a plan as usual. [`SKILL.md`](SKILL.md) is the procedure the agent follows.
+Copy this folder (without `.git/`) where your agent looks for skills, and keep its name: `explorable-plan`
+must match the `name:` in `SKILL.md`.
+
+| Agent | In a project | For all your projects |
+| --- | --- | --- |
+| Codex, Gemini CLI, GitHub Copilot, Cursor, OpenCode | `.agents/skills/explorable-plan/` | `~/.agents/skills/explorable-plan/` |
+| Claude Code | `.claude/skills/explorable-plan/` | `~/.claude/skills/explorable-plan/` |
+
+Claude Code does not read `.agents/skills/`. To serve every agent from one copy, put the folder in
+`.agents/skills/` and link it from `.claude/skills/` (Claude Code follows a linked skill folder):
+
+```
+mkdir -p .claude/skills
+ln -s ../../.agents/skills/explorable-plan .claude/skills/explorable-plan
+```
+
+Copilot, Cursor and OpenCode read `.claude/skills/` as well, so with the link they may list the skill twice.
+If you only use those three and Claude Code, `.claude/skills/` alone is enough. Each agent also has a folder
+of its own (`.gemini/skills/`, `.github/skills/`, `.cursor/skills/`, `.opencode/skills/`). Paths as documented
+on 10 October 2026: [Claude Code](https://code.claude.com/docs/en/skills),
+[Codex](https://developers.openai.com/codex/skills), [Gemini CLI](https://geminicli.com/docs/cli/skills/),
+[GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills),
+[Cursor](https://cursor.com/docs/context/skills), [OpenCode](https://opencode.ai/docs/skills/).
+
+Then ask for a plan as usual. [`SKILL.md`](SKILL.md) is the procedure the agent follows. Where it names a
+Claude Code tool (AskUserQuestion, Artifact), it also says what to do without it: ask in the chat, hand over
+the file.
+
+**An agent that does not load skills** can follow the same procedure if its instructions file points to it.
+Add a line like this to the file it reads (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`,
+`.github/copilot-instructions.md`), with the path where you put the folder:
+
+```
+Before a non-trivial change, write a PLAN and follow .agents/skills/explorable-plan/SKILL.md.
+```
 
 Dependencies:
 
@@ -67,8 +104,9 @@ Dependencies:
 - **`pip install playwright`** and **`playwright install chromium`** for `kit/check.py`. Without them
   `check.py` still runs the source checks, says that the browser checks were NOT run, and exits with code 3,
   never 0.
-- **The Artifact tool** (Claude Code) is optional. With it the skill builds with `--fragment` and publishes the
-  page. Without it the skill builds a complete HTML document and gives you the file.
+- **A publishing tool** is optional: the Artifact tool in Claude Code, or your agent's own if it keeps the
+  page private. With it the skill publishes the page, built with `--fragment` when the tool adds the document
+  skeleton itself. Without it the skill builds a complete HTML document and gives you the file.
 - **git**, for the commit the page reflects (`git rev-parse --short HEAD`).
 
 ## Use the kit without the skill
