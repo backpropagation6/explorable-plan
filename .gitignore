@@ -1,0 +1,8 @@
+# build outputs and check screenshots
+/out/
+*.built.html
+*-check/
+
+# Python
+__pycache__/
+*.pyc

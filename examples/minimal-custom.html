@@ -1,0 +1,292 @@
+<!--plan
+title: Explorable plan example
+description: An invented example PLAN that uses every component of the explorable-plan kit once.
+masthead: PLAN · example, invented
+date: 10 October 2026
+plan: PLAN-export-worker-2026-10-10.md
+commit: 0000000
+theme: custom
+theme-colors: light ink=#14213d paper=#fdf6e3 accent=#b4236a
+  dark ink=#f1e9d2 paper=#101a2e accent=#f4a261
+theme-font: serif
+lang: en
+sources: <p>This plan, its figures and its quote are invented to show the kit. Every figure carries a label: <code>estimate:</code> for a guess, <code>example:</code> for an illustration.</p>
+-->
+<main id="content">
+
+<section class="band" aria-labelledby="h-top">
+<div class="col">
+<p class="label">Example page: every component, once. The plan below is invented.</p>
+<h1 id="h-top">Move the nightly export to a queue worker</h1>
+<p class="lead">The export runs as one long job and fails silently when it overruns. The plan replaces it with a worker that takes one account at a time and reports each result.</p>
+<dl class="facts">
+<div><dt>Status</dt><dd>PLAN committed, commit <code>0000000</code> (example).</dd></div>
+<div><dt>Effort</dt><dd><span class="note">estimate:</span> 2 sessions.</dd></div>
+<div><dt>Page</dt><dd>Worth building only because the plan has decisions. This page is the kit's example.</dd></div>
+<div><dt>Needed from you</dt><dd>Nothing: the <a href="#decisions">decisions form</a> below is an example.</dd></div>
+</dl>
+<h2 class="label" style="margin-top:32px">On this page</h2>
+<ol class="toc">
+<li><a href="#choices">What changes</a></li>
+<li><a href="#flow">How a page gets built</a></li>
+<li><a href="#need">Does a plan need a page?</a></li>
+<li><a href="#steps">The steps</a></li>
+<li><a href="#cost">What it costs</a></li>
+<li><a href="#risks">Risks</a></li>
+<li><a href="#decisions">Decisions form (example)</a></li>
+</ol>
+</div>
+</section>
+
+<section class="band band-wash" id="choices" aria-labelledby="h-choices">
+<div class="col">
+<h2 id="h-choices">What changes</h2>
+<div class="choices">
+<div><h3>Before</h3><p>One job exports every account in a single pass. If it overruns, nobody hears about it until a customer asks.</p></div>
+<div><h3>After</h3><p>A worker takes one account at a time from a queue and writes a result per account. A missing result is visible the same day.</p></div>
+</div>
+</div>
+</section>
+
+<section class="band band-dark" aria-label="Quote">
+<div class="col">
+<blockquote class="pull"><p>A plan nobody can check is a wish list.</p><footer>Invented quote, for the example</footer></blockquote>
+</div>
+</section>
+
+<section class="band" id="flow" aria-labelledby="h-flow">
+<div class="col">
+<h2 id="h-flow">How a page gets built</h2>
+<figure>
+<svg class="diag-h" viewBox="0 0 760 124" role="img" aria-label="From the committed PLAN to the published page: build, check, publish, link in the plan header. A failed check goes back to the build.">
+<defs><marker id="fh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-ink"/></marker></defs>
+<g class="s-ink" fill="none" stroke-width="1">
+<rect x="0.5" y="34.5" width="120" height="52" class="f-paper"/><rect x="160.5" y="34.5" width="120" height="52" class="f-paper"/><rect x="320.5" y="34.5" width="120" height="52" class="f-paper"/><rect x="480.5" y="34.5" width="120" height="52" class="f-paper"/><rect x="640.5" y="34.5" width="119" height="52" class="f-paper"/>
+<path d="M121 60.5 H158" marker-end="url(#fh)"/><path d="M281 60.5 H318" marker-end="url(#fh)"/><path d="M441 60.5 H478" marker-end="url(#fh)"/><path d="M601 60.5 H638" marker-end="url(#fh)"/>
+<path d="M380.5 34 V14.5 H220.5 V32" class="s-muted" stroke-dasharray="4 3" marker-end="url(#fh)"/>
+</g>
+<g font-size="15" text-anchor="middle"><text x="60" y="57">PLAN</text><text x="220" y="57">build.py</text><text x="380" y="57">check.py</text><text x="540" y="57">Publish</text><text x="700" y="57">Link</text></g>
+<g font-size="12" class="t-muted" text-anchor="middle"><text x="60" y="75">committed</text><text x="220" y="75">kit + text</text><text x="380" y="75">Chromium</text><text x="540" y="75">Artifact tool</text><text x="700" y="75">plan header</text></g>
+<g font-size="12" text-anchor="middle"><text x="140" y="110">content</text><text x="300" y="110">page</text><text x="460" y="110">OK</text><text x="620" y="110">URL</text><text x="300" y="10" class="t-muted">KO: fix and rebuild</text></g>
+</svg>
+<svg class="diag-v" viewBox="0 0 340 456" role="img" aria-label="From the committed PLAN to the published page: build, check, publish, link in the plan header. A failed check goes back to the build.">
+<defs><marker id="fv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-ink"/></marker></defs>
+<g class="s-ink" fill="none" stroke-width="1">
+<rect x="80.5" y="0.5" width="200" height="52" class="f-paper"/><rect x="80.5" y="100.5" width="200" height="52" class="f-paper"/><rect x="80.5" y="200.5" width="200" height="52" class="f-paper"/><rect x="80.5" y="300.5" width="200" height="52" class="f-paper"/><rect x="80.5" y="400.5" width="200" height="52" class="f-paper"/>
+<path d="M180.5 53 V98" marker-end="url(#fv)"/><path d="M180.5 153 V198" marker-end="url(#fv)"/><path d="M180.5 253 V298" marker-end="url(#fv)"/><path d="M180.5 353 V398" marker-end="url(#fv)"/>
+<path d="M80 226.5 H50.5 V126.5 H78" class="s-muted" stroke-dasharray="4 3" marker-end="url(#fv)"/>
+</g>
+<g font-size="15" text-anchor="middle"><text x="180" y="23">PLAN</text><text x="180" y="123">build.py</text><text x="180" y="223">check.py</text><text x="180" y="323">Publish</text><text x="180" y="423">Link</text></g>
+<g font-size="12" class="t-muted" text-anchor="middle"><text x="180" y="41">committed</text><text x="180" y="141">kit + text</text><text x="180" y="241">Chromium</text><text x="180" y="341">Artifact tool</text><text x="180" y="441">plan header</text></g>
+<g font-size="12"><text x="190" y="80">content</text><text x="190" y="180">page</text><text x="190" y="280">OK</text><text x="190" y="380">URL</text><text x="8" y="180" class="t-muted">KO</text></g>
+</svg>
+<figcaption>The PLAN file stays the source. The page is built from the kit, passes the check and only then is published; the link goes back into the plan header. A failed check sends you back to the content.</figcaption>
+</figure>
+
+<div class="tabs" id="tabs-kit">
+<div role="tablist" aria-label="The kit" hidden>
+<button role="tab" id="t-k1" aria-controls="p-k1">Template</button>
+<button role="tab" id="t-k2" aria-controls="p-k2">Script</button>
+<button role="tab" id="t-k3" aria-controls="p-k3">Check</button>
+</div>
+<div class="tabpanel" role="tabpanel" id="p-k1" aria-labelledby="t-k1">
+<h3>Template</h3>
+<p><code>base.html</code> holds the components, the light and dark modes and the print rules. Colours and font come from the theme chosen in the metadata; your text goes where the placeholder is.</p>
+</div>
+<div class="tabpanel" role="tabpanel" id="p-k2" aria-labelledby="t-k2">
+<h3>Script</h3>
+<p><code>base.js</code> handles the generic parts: tabs from the keyboard, disclosures, steps with previous and next, the answer to copy. Page-specific interactions go in a script inside the content.</p>
+</div>
+<div class="tabpanel" role="tabpanel" id="p-k3" aria-labelledby="t-k3">
+<h3>Check</h3>
+<p><code>check.py</code> opens the page in Chromium at two widths, light and dark, tries every tab, prints, and loads the page without JavaScript.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="band band-wash" id="need" aria-labelledby="h-need">
+<div class="col">
+<h2 id="h-need">Does a plan need a page?</h2>
+<p>The skill writes the plan file every time, but builds a page only if the plan asks the reader for at least one decision or estimates more than one session. Try the four cases.</p>
+<div class="tabs" id="tabs-cases">
+<div role="tablist" aria-label="Cases" hidden>
+<button role="tab" id="t-c1" aria-controls="c1">Case 1</button>
+<button role="tab" id="t-c2" aria-controls="c2">Case 2</button>
+<button role="tab" id="t-c3" aria-controls="c3">Case 3</button>
+<button role="tab" id="t-c4" aria-controls="c4">Case 4</button>
+</div>
+<div class="tabpanel case" role="tabpanel" id="c1" aria-labelledby="t-c1" data-correct="no" data-why="No decision and one session: the file on the main branch and a short summary are enough.">
+<h3>A typo fix in three files</h3><p>A mechanical correction, no choices, half an hour.</p>
+<fieldset class="choice only-js"><legend>Build a page?</legend><div class="actions"><button class="action" type="button" data-answer="yes">Yes</button><button class="action" type="button" data-answer="no">No</button></div></fieldset>
+<div class="outcome" aria-live="polite"></div>
+</div>
+<div class="tabpanel case" role="tabpanel" id="c2" aria-labelledby="t-c2" data-correct="yes" data-why="The plan asks the reader to pick a route: the page exists to make that choice easy.">
+<h3>A migration with two routes</h3><p>The plan asks the reader which of the two routes to take.</p>
+<fieldset class="choice only-js"><legend>Build a page?</legend><div class="actions"><button class="action" type="button" data-answer="yes">Yes</button><button class="action" type="button" data-answer="no">No</button></div></fieldset>
+<div class="outcome" aria-live="polite"></div>
+</div>
+<div class="tabpanel case" role="tabpanel" id="c3" aria-labelledby="t-c3" data-correct="yes" data-why="No decision, but the estimate runs past one session: the page helps the reader follow the work.">
+<h3>A long job without choices</h3><p>No open decision, but the estimate is three sessions.</p>
+<fieldset class="choice only-js"><legend>Build a page?</legend><div class="actions"><button class="action" type="button" data-answer="yes">Yes</button><button class="action" type="button" data-answer="no">No</button></div></fieldset>
+<div class="outcome" aria-live="polite"></div>
+</div>
+<div class="tabpanel case" role="tabpanel" id="c4" aria-labelledby="t-c4" data-correct="no" data-why="Nobody can answer how the page should look, and the page waits for that answer: the job writes the plan file and says in its report that there is no page.">
+<h3>A plan written by an unattended job</h3><p>The plan asks for a decision, but nobody can answer how the page should look.</p>
+<fieldset class="choice only-js"><legend>Build a page?</legend><div class="actions"><button class="action" type="button" data-answer="yes">Yes</button><button class="action" type="button" data-answer="no">No</button></div></fieldset>
+<div class="outcome" aria-live="polite"></div>
+</div>
+</div>
+
+<h3>The rule, with two sliders</h3>
+<div class="only-js">
+<div class="slider-row"><label for="r-dec">Decisions asked of the reader</label><output id="o-dec" for="r-dec">0</output><input type="range" id="r-dec" min="0" max="5" step="1" value="0"></div>
+<div class="slider-row"><label for="r-ses">Sessions estimated</label><output id="o-ses" for="r-ses">1</output><input type="range" id="r-ses" min="1" max="5" step="1" value="1"></div>
+<p class="outcome-box" id="o-rule" aria-live="polite"></p>
+</div>
+<p class="only-nojs small">Without JavaScript: build a page if there is at least one decision or more than one estimated session.</p>
+</div>
+</section>
+
+<section class="band" id="steps" aria-labelledby="h-steps">
+<div class="col">
+<h2 id="h-steps">The steps</h2>
+<p>Four steps, from the plan to the cleanup. After step 2 both the old job and the worker run, so stopping there loses nothing.</p>
+<div class="tabs steps">
+<div role="tablist" aria-label="Steps of the work" class="steps-nav" hidden>
+<button role="tab" id="t-s1" aria-controls="s1" aria-label="Step 1: write the plan">1<span class="m"></span></button>
+<button role="tab" id="t-s2" aria-controls="s2" aria-label="Step 2: add the worker">2<span class="m">safe</span></button>
+<button role="tab" id="t-s3" aria-controls="s3" aria-label="Step 3: switch accounts over">3<span class="m">safe</span></button>
+<button role="tab" id="t-s4" aria-controls="s4" aria-label="Step 4: remove the old job">4<span class="m"></span></button>
+</div>
+<div class="tabpanel" role="tabpanel" id="s1" aria-labelledby="t-s1"><h3>Step 1. Write the plan</h3><p>The plan file comes before any change to the export.</p></div>
+<div class="tabpanel" role="tabpanel" id="s2" aria-labelledby="t-s2"><h3>Step 2. Add the worker</h3><p class="step-meta">safe state</p><p>The worker is deployed next to the old job and handles no account yet.</p></div>
+<div class="tabpanel" role="tabpanel" id="s3" aria-labelledby="t-s3"><h3>Step 3. Switch accounts over</h3><p class="step-meta">safe state</p><p>Accounts move to the worker a few at a time; the old job skips the ones already moved.</p></div>
+<div class="tabpanel" role="tabpanel" id="s4" aria-labelledby="t-s4"><h3>Step 4. Remove the old job</h3><p>Only after every account has a worker result for the agreed period.</p></div>
+<div class="step-ctrl only-js no-print">
+<button class="btn btn-2" type="button" data-step="prev">Previous step</button>
+<button class="btn" type="button" data-step="next">Next step</button>
+</div>
+</div>
+
+<h3>Acceptance test</h3>
+<ul class="checks">
+<li><span class="g">pending</span><span>Each account has a result row for the night, read from the results table.</span></li>
+<li><span class="g">pending</span><span>An account that fails shows up in the report, not only in the logs.</span></li>
+<li><span class="g">pending</span><span><code>check.py</code> prints OK on this page.</span></li>
+<li class="ko"><span class="g">later</span><span>The first overrun after the switch is visible the same day; it can only be seen when it happens.</span></li>
+</ul>
+</div>
+</section>
+
+<section class="band band-wash" id="cost" aria-labelledby="h-cost">
+<div class="col">
+<h2 id="h-cost">What it costs</h2>
+<p>All figures are invented. Solid bars are work, grey is tests.</p>
+<figure>
+<div class="bars" role="img" aria-label="Estimated effort by phase, in sessions: prepare 0.5, build 1.0 of which 0.3 is tests, verify 0.5.">
+<div class="bar"><span class="lab">Prepare</span><div class="track"><span class="seg a" style="width:25%"></span></div><span class="val">0.5</span></div>
+<div class="bar"><span class="lab">Build</span><div class="track"><span class="seg a" style="width:35%"></span><span class="seg b" style="width:15%"></span></div><span class="val">1.0</span></div>
+<div class="bar"><span class="lab">Verify</span><div class="track"><span class="seg a" style="width:25%"></span></div><span class="val">0.5</span></div>
+<div class="axis" aria-hidden="true"><span class="blank"></span><div class="scale"><span style="left:0">0</span><span class="mid" style="left:50%">1</span><span style="left:100%">2 sessions</span></div><span></span></div>
+</div>
+<figcaption>Estimated effort per phase, in sessions. The same figures are in the table below.</figcaption>
+<p class="source">estimate: invented figures, not measured.</p>
+</figure>
+<div class="scroll-x">
+<table>
+<caption class="small">The data of the chart</caption>
+<thead><tr><th>Phase</th><th class="num">Sessions</th><th>Of which</th></tr></thead>
+<tbody>
+<tr><td>Prepare</td><td class="num">0.5</td><td>work 0.5</td></tr>
+<tr><td>Build</td><td class="num">1.0</td><td>work 0.7, tests 0.3</td></tr>
+<tr><td>Verify</td><td class="num">0.5</td><td>work 0.5</td></tr>
+</tbody>
+</table>
+</div>
+<div class="scroll-x">
+<table>
+<thead><tr><th>Kit file</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td class="id"><code>base.html</code></td><td>Components, themes, masthead and footer with the commit.</td></tr>
+<tr><td class="id"><code>base.js</code></td><td>Tabs, disclosures, steps, answer, print.</td></tr>
+<tr><td class="id"><code>build.py</code></td><td>Assembles the page from content and kit.</td></tr>
+<tr><td class="id"><code>check.py</code></td><td>Source and Chromium checks.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section class="band" id="risks" aria-labelledby="h-risks">
+<div class="col">
+<h2 id="h-risks">Risks</h2>
+<div class="disc-group">
+<h3 class="disc-h"><button class="disc-btn" aria-expanded="true" aria-controls="r1">The worker falls behind</button></h3>
+<div class="disc-body" id="r1"><p>A queue that grows faster than the worker drains it shows up as accounts without a result. The report lists them by name.</p></div>
+<h3 class="disc-h"><button class="disc-btn" aria-expanded="true" aria-controls="r2">A result is written twice</button></h3>
+<div class="disc-body" id="r2"><p>Each result row is keyed by account and night, so a retry overwrites instead of adding a second row.</p></div>
+<h3 class="disc-h"><button class="disc-btn" aria-expanded="true" aria-controls="r3">The old job and the worker disagree</button></h3>
+<div class="disc-body" id="r3"><p>During step 3 an account belongs to exactly one of them. A list of moved accounts says which.</p></div>
+<h3 class="disc-h"><button class="disc-btn" aria-expanded="true" aria-controls="r4">Rollback</button></h3>
+<div class="disc-body" id="r4"><p>Until step 4, moving an account back is one line in the list of moved accounts. After step 4, the old job comes back from version control.</p></div>
+</div>
+</div>
+</section>
+
+<section class="band band-wash" id="decisions" aria-labelledby="h-decisions">
+<div class="col">
+<h2 id="h-decisions">Decisions form (example)</h2>
+<p>This plan asks for no decisions. The form shows the component with made-up questions: the answer it composes is not meant to be pasted anywhere.</p>
+<form class="decisions" data-intro="Example of the component, not a real answer:">
+<div class="decision" data-question="Route">
+<h3>1. Which route (example)</h3>
+<label><input type="radio" name="route" data-text="route A."> Route A.</label>
+<label><input type="radio" name="route" data-text="route B."> Route B.</label>
+</div>
+<div class="decision" data-question="Review">
+<h3>2. When to review (example)</h3>
+<div class="kpi-row"><label>After <input type="number" min="1" max="20" data-prefix="after" data-suffix="plans" style="width:5em"> plans</label><label>or on <input type="date" data-prefix="or on"></label></div>
+</div>
+<div class="decision" data-question="Notes">
+<h3>Notes</h3>
+<textarea aria-label="Notes" placeholder="Anything else to change"></textarea>
+</div>
+<div class="decision answer only-js">
+<h3>The answer to paste</h3>
+<textarea class="dec-out" readonly aria-label="Composed answer"></textarea>
+<p><button class="btn dec-copy" type="button">Copy the answer</button><span class="copied dec-copied" aria-live="polite"></span></p>
+</div>
+<p class="only-nojs small">Without JavaScript the answer is not composed: write it in the chat.</p>
+</form>
+</div>
+</section>
+
+</main>
+<script>
+(function(){
+const {$,$$,el}=window.Plan;
+/* quiz on the cases: each .case has data-correct and data-why */
+$$('.case').forEach(c=>{
+  const out=$('.outcome',c);
+  $$('.action',c).forEach(b=>b.addEventListener('click',()=>{
+    $$('.action',c).forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+    const ok=b.dataset.answer===c.dataset.correct;
+    out.textContent='';
+    const box=el('div','outcome-box');
+    box.appendChild(el('p','outcome-tag',ok?'✓ Right':'✕ Not quite'));
+    box.appendChild(el('p',null,c.dataset.why));
+    out.appendChild(box);
+  }));
+});
+/* the rule with two sliders */
+const rd=$('#r-dec'),rs=$('#r-ses');
+function rule(){
+  $('#o-dec').textContent=rd.value;$('#o-ses').textContent=rs.value;
+  const yes=+rd.value>0||+rs.value>1;
+  $('#o-rule').textContent=yes?'Page: yes, '+(+rd.value>0?'there is at least one decision.':'the estimate runs past one session.'):'Page: no. The file and a short summary are enough.';
+}
+[rd,rs].forEach(x=>x.addEventListener('input',rule));
+rule();
+})();
+</script>

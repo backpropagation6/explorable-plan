@@ -1,0 +1,14 @@
+{
+  "label": "High contrast",
+  "description": "Black and white with a strong accent. Every text pair is at least 7:1; gradients are forbidden because they lower contrast behind text.",
+  "font": "sans",
+  "min_contrast": 7,
+  "colors": {
+    "light": {"ink": "#000000", "paper": "#ffffff", "accent": "#0000cc"},
+    "dark":  {"ink": "#ffffff", "paper": "#000000", "accent": "#ffd400"}
+  },
+  "forbidden": [
+    {"name": "CSS gradient", "scope": "css", "pattern": "gradient\\s*\\(", "ignorecase": true},
+    {"name": "SVG gradient", "scope": "source", "pattern": "<(linear|radial)Gradient\\b", "ignorecase": true}
+  ]
+}

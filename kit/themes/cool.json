@@ -1,0 +1,11 @@
+{
+  "label": "Cool",
+  "description": "Pale blue-grey paper, navy ink, blue accent.",
+  "font": "sans",
+  "min_contrast": 4.5,
+  "colors": {
+    "light": {"ink": "#14202e", "paper": "#f7fafc", "accent": "#1d4ed8"},
+    "dark":  {"ink": "#e6edf5", "paper": "#0f1722", "accent": "#7fb0ff"}
+  },
+  "forbidden": []
+}

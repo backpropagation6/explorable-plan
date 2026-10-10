@@ -1,0 +1,11 @@
+{
+  "label": "Warm",
+  "description": "Cream paper, brown ink, terracotta accent.",
+  "font": "sans",
+  "min_contrast": 4.5,
+  "colors": {
+    "light": {"ink": "#2b2118", "paper": "#fbf6ee", "accent": "#9a3412"},
+    "dark":  {"ink": "#f3ebe0", "paper": "#1f1a15", "accent": "#fb923c"}
+  },
+  "forbidden": []
+}

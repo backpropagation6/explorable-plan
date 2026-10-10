@@ -1,0 +1,11 @@
+{
+  "label": "Neutral",
+  "description": "Black, white and greys. The default.",
+  "font": "sans",
+  "min_contrast": 4.5,
+  "colors": {
+    "light": {"ink": "#171717", "paper": "#ffffff", "accent": "#171717"},
+    "dark":  {"ink": "#f2f2f2", "paper": "#191919", "accent": "#f2f2f2"}
+  },
+  "forbidden": []
+}

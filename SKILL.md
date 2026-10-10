@@ -1,0 +1,118 @@
+---
+name: explorable-plan
+description: Write a PLAN file, then turn it into an explorable HTML page (tabs, steps, charts, a decisions form) after asking how the report should look. Build and check it in Chromium; publish with the Artifact tool or hand over the file. Use for plans that need decisions or span several sessions.
+---
+
+# explorable-plan: write the plan, then the page when it earns one
+
+The root is the folder that contains this file, not the working directory: call the scripts by absolute
+path (`python3 <root>/kit/build.py ...`). The format of a PLAN is in [`references/plan-format.md`](references/plan-format.md).
+
+## Procedure
+
+**1) Write the PLAN** as in `references/plan-format.md` and commit it. The page comes after the file, never
+in place of it.
+
+**2) Decide whether a page is needed.** Yes if the plan asks the reader for at least one decision or estimates
+more than one session. The Artifact tool has no part in this decision. Otherwise summarise the plan in the
+chat and stop here.
+
+If a page is needed, **ask how the report should look before any content is written or built.**
+
+- Ask exactly two questions, with the AskUserQuestion tool when it is available, otherwise in the chat as two
+  numbered questions with the options listed. The default is the first option of each.
+  1. **Palette:** neutral (black, white and greys; the default) / warm / cool / high contrast. "Other" means
+     the user's own brand colours, given in hex.
+  2. **Type:** system sans (the default) / system serif / system mono.
+- Ask, then wait for the answer: end the turn with the questions, and never write the content or build in the
+  same turn as the question. Only an explicit "no preference" ("you choose", "whatever") lets you go on
+  without an answer: use `theme: neutral` and `theme-font: sans`. Silence is not an answer.
+- Where nobody can answer (an unattended job) the questions cannot be asked: build no page and say so in the
+  report.
+- Light and dark mode (they follow the reader's system) and a single density are fixed defaults. They are not
+  questions.
+- Ask nothing if the user already named a theme, colours or a font, or if you are rebuilding a page whose
+  metadata already has `theme:`: reuse what it says.
+- Write the answer into the metadata block of the content (step 4). `theme:` is required: a preset becomes
+  `theme: <name>` (`theme: neutral` is the default look); the type becomes `theme-font: sans|serif|mono`;
+  brand colours become `theme: custom` plus `theme-colors:` (ink, paper and accent in hex, one line for
+  `light` and one for `dark`; see the README). If the user gave only an accent, take ink and paper from the
+  neutral theme and adjust the accent per mode (darker on light, lighter on dark). If the user gave only
+  light colours, write the dark row yourself: swap ink and paper and lighten the accent until `build.py`
+  accepts it. If the colours come as names (such as "navy"), ask once for hex codes, or propose hex values
+  and get a yes. `build.py` rejects a custom theme whose text/background contrast is under 4.5:1 in either
+  mode and names the pair; fix the colour and tell the user the value you used.
+- `lang:` is `en` by default, or `it` when the conversation is in Italian. Write the content in that language.
+  It is not a question.
+
+**3) Re-read the plan file.** Every figure on the page already exists in the plan with its label (source,
+measurement or estimate); the page adds no numbers. Examples you invent are declared as such on the page.
+
+**4) Write the content** in a scratch file outside the repository, starting from
+[`examples/minimal.html`](examples/minimal.html): the `<!--plan` metadata block first (including `theme:` and
+`lang:` from step 2, and `commit:` from `git rev-parse --short HEAD` after the plan commit), then
+`<main id="content">`. Show the eight things a plan page needs: status and effort; the choices already made;
+the mechanism in a diagram; a manipulable example of the delicate point; the acceptance test, simulable and
+starting empty ("to be measured"); the steps with their safe states; costs and risks; the decisions, with an
+answer the reader can paste into the chat. Every chart has its twin data table; every verdict carries a glyph
+and a word (`✓`, `✕`), never colour alone. Page-specific interactions go in a `<script>` inside the content
+and use `window.Plan`.
+
+**5) Build and check.** The Artifact tool decides how the page is delivered, never whether it is built. With
+the tool, build with `--fragment` (the tool adds the document skeleton) and publish in step 6. Without it,
+build the default, a complete document, and hand the user the local file path in step 6.
+
+```
+python3 <root>/kit/build.py [--fragment] <content.html> <page.html>
+python3 <root>/kit/check.py <page.html> <screenshot-folder>
+```
+
+Repeat until `check.py` prints `OK`. Exit code 3 means the browser checks did not run (playwright or Chromium
+is missing): that is not a pass. The check is a smoke test, not a gate: it finds the faults listed at the top
+of `kit/check.py`, not a readable colour outside the theme, overlaps or cut-off labels. Look at the
+screenshots, light and dark, at 1280 and 390 px, before trusting an OK.
+
+**6) Deliver.** With the Artifact tool: publish (private by default), after re-reading the whole file. Without
+it: give the user the absolute path of the checked file and say to open it in a browser.
+
+**7) If you published, put the link in the PLAN header** and commit:
+`> **Explorable presentation:** [interactive page](<url>) (private; reflects commit <sha>). If the two differ, the plan file is canonical.`
+A file handed over has no link: there is nothing to put in the header.
+
+**8) Tell the user** the link (or the file path) and the decisions you need from them; if step 2 ruled the page
+out, say that.
+
+**9) When the user answers,** the decisions go into the PLAN (a dated `## Decisions` section, or `## Outcome` if
+the work is closed) and are committed in the same session: an answer that stays in the chat or on the page is
+not recorded. If they change the plan, the paragraph below applies.
+
+## When the plan changes after delivery
+
+Update the content and its `commit:`, rebuild with the same flag as before, then republish at the same URL and
+update the commit in the PLAN header, or hand over the new file. In a new session the content file no longer
+exists: read the page back (with the Artifact tool's read action, which saves the whole page to a file, or
+from the file you handed over) and run
+`python3 <root>/kit/build.py --extract <saved page> <content.html>`. `build.py` wraps the content between two
+sentinel comments and repeats the `<!--plan` block at the end of the page, so `--extract` rebuilds metadata
+(theme and lang included), `<main>` and scripts untouched, from a complete document, a fragment, or a
+fragment inside another skeleton. Do not ask the look again; start from step 5.
+
+## The kit
+
+| File | What it does |
+| --- | --- |
+| [`kit/base.html`](kit/base.html) | Components (bands, tabs, disclosures, steps, bars, number tables, decisions), light and dark mode (the reader's system, or `data-theme="light"`/`"dark"` on the root element), print rules, masthead and footer with the commit and "the file is canonical"; `lang` and `data-plan-theme` on the content wrapper, also without JavaScript. |
+| [`kit/base.js`](kit/base.js) | The generic parts, exposed as `window.Plan`: keyboard tabs, steps with previous and next, disclosures, a composable answer with copy, print with everything open and then the state from before. UI strings come from a per-language dictionary. |
+| [`kit/build.py`](kit/build.py) | Assembles content and kit into a complete HTML document (`--fragment`: only the part inside a document), resolves the theme, moves page scripts after `base.js`, wraps the content in sentinels and repeats the metadata at the end; `--extract` does the reverse. Fails on a missing (`theme` included), unknown or repeated key, a non-hex commit, a title outside 2-4 words, an unknown theme, a custom theme without both rows or under 4.5:1, any `%%` left in the page, or the same path for input and output. |
+| [`kit/check.py`](kit/check.py) | Smoke test of the page as delivered: source checks (external resources, size, footer, the theme's `forbidden` rules) and Chromium checks (JS errors, horizontal scroll, background, the light/dark switch on the root element, text contrast, bars, tabs and steps with a click cap, print and back, no-JavaScript view). |
+| [`kit/themes/`](kit/themes) | The presets: `neutral`, `warm`, `cool`, `high-contrast`. |
+| [`examples/`](examples) | An invented PLAN with every component, in the neutral theme and with a custom one. |
+
+## What it does not do
+
+- It does not replace the PLAN, ask for decisions the PLAN does not ask for, or add numbers.
+- It does not commit the generated HTML: outputs go outside the repository, and the working copy of the
+  content travels inside the page.
+- It does not build a page where nobody can answer the questions of step 2 (an unattended job): there only
+  step 1 applies.
+- It ships no font files: system font stacks only.
