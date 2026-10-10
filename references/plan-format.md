@@ -62,8 +62,13 @@ it happened.
   to follow, do not rewrite: start a new PLAN file from the current state, link it to the old one, and leave
   the old one as it is.
 
-The page lists the versions in its footer (number, date, commit, what changed). Each one can be read back
-with `git show <commit>:<plan file>`.
+A rewrite that happens anyway does not go unseen: `python3 kit/plan_history.py PLAN-<topic>-*.md` reads the
+history of the file and fails on it. If the rewrite is not committed, put the text back. If it is, it cannot
+be undone without rewriting history, so declare it: a later section names the commit and says what it
+changed, and the earlier text stays readable in git.
+
+The page lists the versions in its footer (number, date, commit, what changed), printed by
+`plan_history.py --versions`. Each one can be read back with `git show <commit>:<plan file>`.
 
 ## Closing: the outcome section
 
@@ -83,9 +88,9 @@ in the chat or on the page is not recorded.
    implementation commits. If the plan came later, say so.
 2. **The inflated plan.** A plan twice as long as the change it describes is a bad sign, not a good one. The
    four sections fit comfortably on one page for most changes.
-3. **The rewritten plan.** After the first commit, `git log -p -- PLAN-<topic>-*.md` should show only added
-   lines, apart from the header. A removed or changed line below the header means an approved version was
-   rewritten instead of followed by a new one.
+3. **The rewritten plan.** After the first commit the file should only grow, apart from the header.
+   `python3 kit/plan_history.py PLAN-<topic>-*.md` checks it commit by commit and names every rewrite, with
+   the commit that still holds the text it replaced.
 
 ## What the explorable page shows
 

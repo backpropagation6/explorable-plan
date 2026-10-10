@@ -23,6 +23,8 @@ your HTML as it is, build the complete document.
 **1) Write the PLAN** as in `references/plan-format.md` and commit it. The page comes after the file, never
 in place of it. That commit is version 1, and from then on the file only grows: a change is a new
 `## Version N` section at the end, never an edit of what is already committed (§ Versions of the format).
+After every commit of the plan run `python3 <root>/kit/plan_history.py <PLAN>`: it reads the file's history in
+git and exits 1 on a rewrite, committed or not, naming the lines and the commit that still holds the text.
 
 **2) Decide whether a page is needed.** Yes if the plan asks the reader for at least one decision or estimates
 more than one session. The Artifact tool has no part in this decision. Otherwise summarise the plan in the
@@ -61,9 +63,10 @@ measurement or estimate); the page adds no numbers. Examples you invent are decl
 
 **4) Write the content** in a scratch file outside the repository, starting from
 [`examples/minimal.html`](examples/minimal.html): the `<!--plan` metadata block first (including `theme:` and
-`lang:` from step 2, `commit:` from `git rev-parse --short HEAD` after the plan commit, and `versions:` with
-one line per version of the plan, oldest first, `<N> <YYYY-MM-DD> <commit> <what changed>`, the last one with
-the same commit as `commit:`; for a first page, `versions: 1 <date> <commit> First plan.`), then
+`lang:` from step 2, `commit:` from `git rev-parse --short HEAD` after the plan commit, and `versions:`, one
+line per version of the plan, oldest first, `<N> <YYYY-MM-DD> <commit> <what changed>`, the last one with the
+same commit as `commit:`. Do not write it from memory: `python3 <root>/kit/plan_history.py --versions <PLAN>`
+prints it from git), then
 `<main id="content">`. Show the eight things a plan page needs: status and effort; the choices already made;
 the mechanism in a diagram; a manipulable example of the delicate point; the acceptance test, simulable and
 starting empty ("to be measured"); the steps with their safe states; costs and risks; the decisions, with an
@@ -80,7 +83,8 @@ python3 <root>/kit/build.py [--fragment] <content.html> <name>.v<N>.html
 python3 <root>/kit/check.py <name>.v<N>.html <screenshot-folder>
 ```
 
-Name the page after its version. `build.py` never overwrites another version: it rebuilds the same version
+Build only from a plan that `plan_history.py` passes. Name the page after its version. `build.py` never
+overwrites another version: it rebuilds the same version
 of the same plan in place (that is how you fix what `check.py` finds), and it stops, leaving the file as it
 is, on a file that holds another version, another plan, or no plan at all. Do not delete that file to get
 past the error: write to the name the error proposes.
@@ -109,11 +113,13 @@ applies.
 
 A change is a new version, never an overwrite: of the plan file, of the page file, or of the published page.
 
-1. Append `## Version <N+1> (YYYY-MM-DD)` to the PLAN (what changes, in which section, why) and commit it on
-   its own.
+1. Append `## Version <N+1> (YYYY-MM-DD)` to the PLAN (what changes, in which section, why; its first sentence
+   becomes the line on the page), commit it on its own, and run `plan_history.py`: it must print `OK`. If it
+   finds a rewrite, put the text back; if the rewrite is already committed, say in the new section which
+   commit it was and what it changed.
 2. Get the content file of version N (in a new session it no longer exists: see below). Update the page where
-   the new version changes it, add the line `<N+1> <YYYY-MM-DD> <commit> <what changed>` to `versions:`, set
-   `commit:` to that commit and `date:` to today. The page footer shows the line as you write it.
+   the new version changes it, replace `versions:` with what `plan_history.py --versions` prints, set `commit:` to the
+   commit of version N+1 and `date:` to today. The page footer shows those lines as they are.
 3. Build with the same flag as before into a new file, `<name>.v<N+1>.html`, and check it as in step 5. The
    file of version N stays where it is.
 4. Republish at the same URL and update the version and the commit in the PLAN header. The Artifact tool keeps
@@ -135,6 +141,7 @@ are only rebuilding the same version.
 | [`kit/base.html`](kit/base.html) | Components (bands, tabs, disclosures, steps, bars, number tables, decisions), light and dark mode (the reader's system, or `data-theme="light"`/`"dark"` on the root element), print rules, masthead with the version, footer with the commit, the list of versions and "the file is canonical"; `lang` and `data-plan-theme` on the content wrapper, also without JavaScript. |
 | [`kit/base.js`](kit/base.js) | The generic parts, exposed as `window.Plan`: keyboard tabs, steps with previous and next, disclosures, a composable answer with copy, print with everything open and then the state from before. UI strings come from a per-language dictionary. |
 | [`kit/build.py`](kit/build.py) | Assembles content and kit into a complete HTML document (`--fragment`: only the part inside a document), resolves the theme, moves page scripts after `base.js`, wraps the content in sentinels and repeats the metadata at the end; `--extract` does the reverse. Fails on a missing (`theme` included), unknown or repeated key, a non-hex commit, a title outside 2-4 words, an unknown theme, a custom theme without both rows or under 4.5:1, any `%%` left in the page, the same path for input and output, a malformed `versions:` list, or an output that holds another version, another plan or no plan (it is never overwritten). |
+| [`kit/plan_history.py`](kit/plan_history.py) | Reads the PLAN file's history in git, commit by commit and then the working copy: the header may change, the body may only grow at the end. Exits 1 on an uncommitted rewrite, on a committed one that no later section declares, or on `## Version N` headings out of order; 2 without git or without a first commit. `--versions` prints the `versions:` block for the page. |
 | [`kit/check.py`](kit/check.py) | Smoke test of the page as delivered: source checks (external resources, size, footer, the theme's `forbidden` rules) and Chromium checks (JS errors, horizontal scroll, background, the light/dark switch on the root element, text contrast, bars, tabs and steps with a click cap, print and back, no-JavaScript view). |
 | [`kit/themes/`](kit/themes) | The presets: `neutral`, `warm`, `cool`, `high-contrast`. |
 | [`examples/`](examples) | An invented PLAN with every component, in the neutral theme and with a custom one. |

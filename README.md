@@ -58,8 +58,9 @@ the two differ. When you answer, your decisions go back into the plan file, not 
 6) **It delivers it.** With a publishing tool (the Artifact tool in Claude Code) it publishes a private page;
    without one, you get the path of the file to open in a browser.
 7) **A change is a new version, not an overwrite.** The plan file only grows: a change is a `## Version N`
-   section at its end. The page is built into a new file (`name.v2.html`), republished at the same URL, and
-   lists every version in its footer with its date, commit and what changed.
+   section at its end, and `kit/plan_history.py` reads the file's history in git and fails on any rewrite,
+   committed or not. The page is built into a new file (`name.v2.html`), republished at the same URL, and
+   lists every version in its footer with its date, commit and what changed, taken from git.
 
 ![The example page in the four presets and a custom theme, light row and dark row](docs/themes.png)
 
@@ -117,6 +118,7 @@ Dependencies:
 ```
 python3 kit/build.py examples/minimal.html out/minimal.html
 python3 kit/check.py out/minimal.html out/minimal-check
+python3 kit/plan_history.py path/to/PLAN-topic-2026-10-10.md
 ```
 
 Open `out/minimal.html` in a browser. `build.py` takes a content file (a metadata comment, then HTML) and
@@ -129,6 +131,14 @@ version, another plan, or a file it did not write. The error proposes the name t
 `<!doctype` is loaded as it is, anything else is wrapped in a skeleton first), prints `OK` and exits 0, or
 lists the problems and exits 1. Write outputs outside your repository, or under `out/`, which `.gitignore`
 covers.
+
+`plan_history.py` checks a PLAN file kept in git: commit by commit, then the working copy, the header (the
+lines before the first `## ` heading) may change and the body may only grow at the end. It exits 0 when the
+plan only grew, 1 on a rewrite that is not committed or that no later section of the plan declares by its
+commit, and 2 without git or a first commit. Each rewrite comes with its lines and the commit that still holds
+the earlier text. With `--versions` it prints the `versions:` block for the page: version 1 is the first
+commit, version N the commit that added `## Version N`. On a shallow clone it says so and checks only the
+commits it can see.
 
 The pages in `docs/` are the two examples, built with the same command (`docs/index.html` from
 `examples/minimal.html`, `docs/custom.html` from `examples/minimal-custom.html`). They are served at fixed
@@ -292,6 +302,7 @@ a page that uses them follows the theme and both modes.
 SKILL.md                         the procedure; step 2 asks how the page should look
 kit/base.html base.js            template and generic script
 kit/build.py check.py            assemble and check
+kit/plan_history.py              the PLAN file's versions in git, and its rewrites
 kit/themes/*.json                the four presets
 examples/minimal.html            an invented PLAN, neutral theme
 examples/minimal-custom.html     the same content, custom theme
